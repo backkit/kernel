@@ -1,0 +1,23 @@
+{
+  "name": "backkit-kernel",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/backkit/kernel.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/backkit/kernel/issues"
+  },
+  "homepage": "https://github.com/backkit/kernel#readme",
+  "dependencies": {
+    "awilix": "^4.0.0",
+    "camelcase": "^5.0.0"
+  }
+}
