@@ -8,7 +8,7 @@ module.exports = ({appdir}) => {
 
   // register appdir
   container.register({
-    appdir: appdir
+    appdir: awilix.asValue(appdir, { lifetime: awilix.Lifetime.SINGLETON })
   });
 
   // register services
