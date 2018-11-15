@@ -16,10 +16,22 @@ module.exports = ({appdir}) => {
     if (file.endsWith(".js")) {
       const name = camelCase(file.substr(0, file.length - 3));
       console.log(`loading service from ./services/${file} as "${name}" service`);
-      const cls = require(`${appdir}/services/${file}`);
-      container.register({
-        [name]: awilix.asClass(cls, { lifetime: awilix.Lifetime.SINGLETON })
-      });
+      const mod = require(`${appdir}/services/${file}`);
+      if (typeof mod === 'function') {
+        if (mod.toString().startsWith('function') || mod.toString().startsWith('class')) {
+          container.register({
+            [name]: awilix.asClass(mod, { lifetime: awilix.Lifetime.SINGLETON })
+          });
+        } else {
+          container.register({
+            [name]: awilix.asFunction(mod, { lifetime: awilix.Lifetime.SINGLETON })
+          });
+        }
+      } else {
+        container.register({
+          [name]: awilix.asValue(mod, { lifetime: awilix.Lifetime.SINGLETON })
+        });
+      }
     }
   });
 
@@ -32,10 +44,22 @@ module.exports = ({appdir}) => {
         const file = path.basename(filepath, path.extname(filepath));
         const name = `res.${serviceName}.${camelCase(file)}`;
         console.log(`loading service dependency as "${name}"`);
-        const cls = require(filepath);
-        container.register({
-          [name]: awilix.asClass(cls, { lifetime: awilix.Lifetime.SINGLETON })
-        });
+        const mod = require(filepath);
+        if (typeof mod === 'function') {
+          if (mod.toString().startsWith('function') || mod.toString().startsWith('class')) {
+            container.register({
+              [name]: awilix.asClass(mod, { lifetime: awilix.Lifetime.SINGLETON })
+            });
+          } else {
+            container.register({
+              [name]: awilix.asFunction(mod, { lifetime: awilix.Lifetime.SINGLETON })
+            });
+          }
+        } else {
+          container.register({
+            [name]: awilix.asValue(mod, { lifetime: awilix.Lifetime.SINGLETON })
+          });
+        }
         container.resolve(name);
       });
     }
