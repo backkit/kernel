@@ -1,5 +1,6 @@
 module.exports = ({appdir}) => {
   const path = require('path');
+  const glob = require('glob');
   const awilix = require('awilix');
   const camelCase = require('camelcase');
   const container = awilix.createContainer({
@@ -40,28 +41,42 @@ module.exports = ({appdir}) => {
     const serviceName = i;
     const service = container.resolve(serviceName);
     if (service.register) {
-      service.register().forEach(filepath => {
-        const file = path.basename(filepath, path.extname(filepath));
-        const name = `res.${serviceName}.${camelCase(file)}`;
-        console.log(`loading service dependency as "${name}"`);
-        const mod = require(filepath);
-        if (typeof mod === 'function') {
-          if (mod.toString().startsWith('function') || mod.toString().startsWith('class')) {
-            container.register({
-              [name]: awilix.asClass(mod, { lifetime: awilix.Lifetime.SINGLETON })
-            });
-          } else {
-            container.register({
-              [name]: awilix.asFunction(mod, { lifetime: awilix.Lifetime.SINGLETON })
-            });
-          }
-        } else {
-          container.register({
-            [name]: awilix.asValue(mod, { lifetime: awilix.Lifetime.SINGLETON })
+      const ret = service.register();
+      (Array.isArray(ret) ? ret : [ret])
+        .forEach(pattern => {
+          glob
+          .sync(pattern, {})
+          .forEach(filepath => {
+            if (filepath.startsWith(appdir)) {
+              const extname = path.extname(filepath);
+              // relative resource path
+              const respath = filepath
+                .slice(appdir.length) // remove appdir
+                .slice(0, -extname.length) // remove file extension
+                .slice(1); // remove first '/'
+              // service name
+              const name = camelCase(respath).replace(/\//g, '.');
+              console.log(`loading ${serviceName} service dependency as "${name}"`);
+              const mod = require(filepath);
+              if (typeof mod === 'function') {
+                if (mod.toString().startsWith('function') || mod.toString().startsWith('class')) {
+                  container.register({
+                    [name]: awilix.asClass(mod, { lifetime: awilix.Lifetime.SINGLETON })
+                  });
+                } else {
+                  container.register({
+                    [name]: awilix.asFunction(mod, { lifetime: awilix.Lifetime.SINGLETON })
+                  });
+                }
+              } else {
+                container.register({
+                  [name]: awilix.asValue(mod, { lifetime: awilix.Lifetime.SINGLETON })
+                });
+              }
+              container.resolve(name); 
+            }
           });
-        }
-        container.resolve(name);
-      });
+        });
     }
   }
 
