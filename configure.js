@@ -7,8 +7,8 @@ const skipAutoconf = process.env.NO_AUTOCONF ? true : false;
 const generate = () => {
   console.log(`writing index.js`);
 
-  if (!fs.existsSync('index.js')) {
-    fs.writeFileSync('index.js', 'require("backkit-kernel")({appdir: __dirname})');
+  if (!fs.existsSync(`${__dirname}/../../index.js`)) {
+    fs.writeFileSync(`${__dirname}/../../index.js`, 'require("backkit-kernel")({appdir: __dirname})');
   }
 };
 
