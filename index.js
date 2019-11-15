@@ -1,4 +1,5 @@
 module.exports = ({appdir}) => {
+  const fs = require('fs');
   const path = require('path');
   const glob = require('glob');
   const awilix = require('awilix');
@@ -6,17 +7,20 @@ module.exports = ({appdir}) => {
   const container = awilix.createContainer({
     injectionMode: awilix.InjectionMode.PROXY
   });
+  let logfn = () => {};
 
-  // register appdir
-  container.register({
-    appdir: awilix.asValue(appdir, { lifetime: awilix.Lifetime.SINGLETON })
-  });
-
-  // register services
-  require('fs').readdirSync(`${appdir}/services`).forEach(file => {
-    if (file.endsWith(".js")) {
+  /**
+   * Attempts to register single service by filename
+   * ex: registerService('logger')
+   * The filename is looked up in ./services folder, by suffixing the service name with .js
+   *
+   * @param {String} service
+   */
+  const registerService = service => {
+    const file = service.endsWith('.js') ? service : `${service}.js`;
+    if (fs.existsSync(`${appdir}/services/${file}`) && file.endsWith(".js")) {
       const name = camelCase(file.substr(0, file.length - 3));
-      console.log(`loading service from ./services/${file} as "${name}" service`);
+      logfn(`loading service from ./services/${file} as "${name}" service`);
       const mod = require(`${appdir}/services/${file}`);
       if (typeof mod === 'function') {
         if (mod.toString().startsWith('function') || mod.toString().startsWith('class')) {
@@ -34,7 +38,28 @@ module.exports = ({appdir}) => {
         });
       }
     }
+  };
+
+  // attempt to register logger if exists, so kernel can log messages in same format as the rest of the app
+  // otherwise, fallsback to console.log
+  try {
+    registerService(`logger`);
+    const logger = container.resolve('logger'); 
+    if (logger) {
+      logfn = logger.info;
+    } else {
+      logfn = console.log;
+    }
+  } catch (ex) {}
+
+  // register appdir
+  container.register({
+    appdir: awilix.asValue(appdir, { lifetime: awilix.Lifetime.SINGLETON })
   });
+
+  // register services
+  fs.readdirSync(`${appdir}/services`).forEach(registerService);
+
 
   // register service dependencies
   for (let i in container.registrations) {
@@ -56,7 +81,7 @@ module.exports = ({appdir}) => {
                 .slice(1); // remove first '/'
               // service name
               const name = camelCase(respath).replace(/\//g, '.');
-              console.log(`loading ${serviceName} service dependency as "${name}"`);
+              logfn(`loading ${serviceName} service dependency as "${name}"`);
               const mod = require(filepath);
               if (typeof mod === 'function') {
                 if (mod.toString().startsWith('function') || mod.toString().startsWith('class')) {
