@@ -11,7 +11,7 @@ Usualy installed when starting new project, it will install the module, create a
 npm init
 
 # install the kernel
-npm install https://github.com/backkit/kernel.git --save
+npm install @backkit/kernel --save
 ```
 
 ## runnable service example
