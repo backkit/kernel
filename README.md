@@ -6,7 +6,7 @@ Usualy installed when starting new project, it will install the module, create a
 
 ## install
 
-```
+```sh
 # init your project
 npm init
 
@@ -18,7 +18,7 @@ npm install @backkit/kernel --save
 
 services/hello.js
 
-```
+```js
 class Hello {
   run() {
     console.log(`hello`) 
@@ -30,7 +30,7 @@ module.exports = Hello;
 
 then start backit app, using `hello` service as entry point
 
-```
+```sh
 ENTRYPOINT=hello node index.js
 ```
 
@@ -40,7 +40,7 @@ first let's create a Friend service
 
 services/friend.js
 
-```
+```js
 class Friend {
   sayHello() {
     console.log("Hello friend")
@@ -52,7 +52,7 @@ module.exports = Friend;
 
 now let's use Friend service from existing, runnable Hello service
 
-```
+```js
 class Hello {
   constructor({friend}) {
     this.friend = friend;
@@ -68,6 +68,6 @@ module.exports = Hello;
 
 run it again
 
-```
+```sh
 ENTRYPOINT=hello node index.js
 ```
