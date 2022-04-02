@@ -10,7 +10,7 @@ const generate = () => {
   // creating entrypoint
   console.log(`creating entry point (index.js)`);
   if (!fs.existsSync(indexPath)) {
-    fs.writeFileSync(indexPath, 'require("backkit-kernel")({appdir: __dirname})');
+    fs.writeFileSync(indexPath, 'require("@backkit/kernel")({appdir: __dirname})');
   }
 
   // creating service dir
