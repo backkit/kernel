@@ -50,7 +50,9 @@ module.exports = ({appdir}) => {
     } else {
       logfn = console.log;
     }
-  } catch (ex) {}
+  } catch (ex) {
+    logfn = console.log;
+  }
 
   // register appdir
   container.register({
@@ -59,7 +61,6 @@ module.exports = ({appdir}) => {
 
   // register services
   fs.readdirSync(`${appdir}/services`).forEach(registerService);
-
 
   // register service dependencies
   for (let i in container.registrations) {
@@ -111,9 +112,11 @@ module.exports = ({appdir}) => {
     if (runnable.run) {
       runnable.run();
     } else {
-      console.error(`ENTRYPOINT must be a runnable service`);  
+      console.error(`ENTRYPOINT must be a runnable service`);
+      process.exit(1);  
     }
   } else {
     console.error(`ENTRYPOINT env variable is required, it must be the name of an existing service`);
+    process.exit(1);
   }
 };
