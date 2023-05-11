@@ -108,12 +108,18 @@ module.exports = ({appdir}) => {
 
   const entrypoint = process.env.ENTRYPOINT;
   if (entrypoint) {
-    const runnable = container.resolve(entrypoint);
-    if (runnable.run) {
-      runnable.run();
+    if (entrypoint === 'test' || entrypoint === 'TEST') {
+      return {
+        container
+      };
     } else {
-      console.error(`ENTRYPOINT must be a runnable service`);
-      process.exit(1);  
+      const runnable = container.resolve(entrypoint);
+      if (runnable.run) {
+        runnable.run();
+      } else {
+        console.error(`ENTRYPOINT must be a runnable service`);
+        process.exit(1);  
+      } 
     }
   } else {
     console.error(`ENTRYPOINT env variable is required, it must be the name of an existing service`);
