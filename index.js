@@ -1,4 +1,9 @@
-module.exports = ({appdir}) => {
+module.exports = ({appdir: originalAppDir = ''}) => {
+
+  // if the kernel is instantiated in a windows environment, the appdir will contain backslashes
+  // correct this by replacing all backslashes with forward slashes
+  const appdir = originalAppDir.replace(/\\/g, '/');
+
   const fs = require('fs');
   const path = require('path');
   const glob = require('glob');
